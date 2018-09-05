@@ -76,13 +76,13 @@ class DiscoverSerializer(serializers.Serializer):
     def validate_fields(self, attrs, source):
         # If we're including exception_stacks.* or exception_frames.* fields
         # then add arrayjoin value so this gets returned as strings
-        pattern = r"^(exception_stacks|exception_frames)\..+"
+
         match = next(
             (
-                re.search(pattern, field).group(1)
+                self.get_array_field(field).group(1)
                 for field
                 in attrs.get(source, [])
-                if re.match(pattern, field)
+                if self.get_array_field(field) is not None
             ),
             None
         )
@@ -91,6 +91,30 @@ class DiscoverSerializer(serializers.Serializer):
             attrs['arrayjoin'] = match
 
         return attrs
+
+    def validate_conditions(self, attrs, source):
+        # Handle exception_stacks, exception_frames
+        if attrs.get(source):
+            conditions = [self.get_condition(condition) for condition in attrs[source]]
+            attrs[source] = conditions
+        return attrs
+
+    def get_array_field(self, field):
+        pattern = r"^(exception_stacks|exception_frames)\..+"
+        return re.search(pattern, field)
+
+    def get_condition(self, condition):
+        array_field = self.get_array_field(condition[0])
+
+        # Cast boolean values to 1 / 0
+        if isinstance(condition[2], bool):
+            condition[2] = int(condition[2])
+
+        # Apply has function to any array field
+        if array_field:
+            return [["has", [array_field.group(0), condition[2]]], "=", 1]
+
+        return condition
 
     def has_projects_access(self, member, organization, requested_projects):
         has_global_access = roles.get(member.role).is_global
