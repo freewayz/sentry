@@ -29,7 +29,7 @@ class AreaChart extends React.Component {
         {...props}
         options={{
           xAxis: XAxis({
-            type: 'time',
+            type: 'category',
             boundaryGap: false,
             axisLabel: {
               formatter: (value, index) => moment(value).format('MMM D'),

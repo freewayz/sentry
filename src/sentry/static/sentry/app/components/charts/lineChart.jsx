@@ -1,4 +1,6 @@
+import moment from 'moment';
 import React from 'react';
+
 import BaseChart from './baseChart';
 import XAxis from './components/xAxis';
 import YAxis from './components/yAxis';
@@ -19,6 +21,9 @@ export default class LineChart extends React.Component {
           xAxis: XAxis({
             type: 'category',
             boundaryGap: false,
+            axisLabel: {
+              formatter: (value, index) => moment(value).format('MMM D'),
+            },
           }),
           yAxis: YAxis({}),
           series: series.map(s => {
