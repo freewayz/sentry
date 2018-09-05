@@ -97,7 +97,7 @@ export default class PercentageBarChart extends React.Component {
             },
           }),
           xAxis: XAxis({
-            type: 'time',
+            type: 'category',
             axisLabel: {
               formatter: (value, index) => moment(value).format('MMM D'),
             },
